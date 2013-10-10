@@ -1,6 +1,7 @@
 import com.github.nscala_time.time.Imports._
 import com.mongodb.casbah.Imports._
 import java.util.Date;
+import scala.collection.immutable._
 
 object Main {
 
@@ -10,7 +11,9 @@ object Main {
     val tweets = collection.find
     while (tweets.hasNext) {
       val tweet = buildTweet(tweets.next)
-      println(tweet.Location(0))
+      println(tweet.Text)
+      for (x <- tweet.termFreq)
+        println(x.toString)
     }
   }
 
@@ -19,7 +22,8 @@ object Main {
     val location = obj.getAs[BasicDBObject]("Location").get
     val coordinates = location.getAs[MongoDBList]("coordinates").get
     val date = obj.getAs[Date]("TweetTime").get
-    new Tweet(text, coordinates, date)
+    val hashtags = obj.getAs[MongoDBList]("HashTags").get.toList
+    new Tweet(text, coordinates, date, hashtags)
   }
 
 }
