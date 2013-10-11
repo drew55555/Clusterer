@@ -1,22 +1,31 @@
 import com.github.nscala_time.time.Imports._
 import com.mongodb.casbah.Imports._
+import com.mongodb.MongoCredential
 import java.util.Date;
 import scala.collection.immutable._
 
 object Main {
 
+ 
   def main(args: Array[String]): Unit = {
-
     val collection = MongoFactory.collection
-    val tweets = collection.find
-    while (tweets.hasNext) {
-      val tweet = buildTweet(tweets.next)
-      println(tweet.Text)
-      for (x <- tweet.termFreq)
-        println(x.toString)
-    }
+    createIDF(collection).foreach(println)
   }
 
+  
+  def returnIDF(collection: MongoCollection): Map[String, Double] = {
+    val query = MongoDBObject("CountryCode" -> "US")
+    val words = scala.collection.mutable.Set[String]()
+    val tweets = collection.find(query)
+    tweets.foreach(x => words ++= buildTweet(x).termFreq.keys)
+    createIDF(words.toSet)
+  }
+  
+  def createIDF(wordSet: Set[String]): Map[String, Double] = {
+    
+  }
+  
+  
   def buildTweet(obj: MongoDBObject): Tweet = {
     val text = obj.getAs[String]("Text").get;
     val location = obj.getAs[BasicDBObject]("Location").get

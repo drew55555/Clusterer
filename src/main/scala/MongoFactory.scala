@@ -1,5 +1,6 @@
 import com.mongodb.casbah.MongoCollection
 import com.mongodb.casbah.MongoConnection
+import com.mongodb._
 
 object MongoFactory {
   private val SERVER = "localhost"
@@ -8,5 +9,6 @@ object MongoFactory {
   private val COLLECTION = "TweetData"
 
   val connection = MongoConnection(SERVER)
+  connection(DATABASE).authenticate("******", "*********")
   val collection = connection(DATABASE)(COLLECTION)
 }
