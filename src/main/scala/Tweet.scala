@@ -14,7 +14,7 @@ class Tweet(text: String, location: MongoDBList, date: Date, hashtags: List[Any]
     val words = ArrayBuffer[String]()
     Text.split("[^A-Za-z]+").copyToBuffer(words)
     for(x <- hashtags)
-      words += x.toString.toUpperCase() 
+      words += x.toString
     words.filter(x => x.toString.length() > 2).groupBy(x => x.toUpperCase()).mapValues(_.size)
   }
 }

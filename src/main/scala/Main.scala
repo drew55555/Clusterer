@@ -1,30 +1,33 @@
-import com.github.nscala_time.time.Imports._
 import com.mongodb.casbah.Imports._
-import com.mongodb.MongoCredential
 import java.util.Date;
 import scala.collection.immutable._
+import scala.math._
 
 object Main {
 
  
   def main(args: Array[String]): Unit = {
-    val collection = MongoFactory.collection
-    createIDF(collection).foreach(println)
+    val factory = new MongoFactory(args(0), args(1))
+    returnIDF(factory.collection).foreach(println)
   }
 
   
   def returnIDF(collection: MongoCollection): Map[String, Double] = {
     val query = MongoDBObject("CountryCode" -> "US")
-    val words = scala.collection.mutable.Set[String]()
+    val words = scala.collection.mutable.ArrayBuffer[String]()
     val tweets = collection.find(query)
+    val docCount = tweets.count
     tweets.foreach(x => words ++= buildTweet(x).termFreq.keys)
-    createIDF(words.toSet)
+    idfMap(words.groupBy(x => x), docCount)//.mapValues(x => idf(x.size, docCount))
   }
   
-  def createIDF(wordSet: Set[String]): Map[String, Double] = {
-    
+  def idfMap(elements: Map[String, scala.collection.mutable.ArrayBuffer[String]], docCount: Double): Map[String, Double] = {
+    elements.flatMap(x => if (x._2.size > 1) Some(x._1 -> idf(x._2.size.toDouble, docCount)) else None)
   }
   
+  def idf(numTerms: Double, docCount: Double): Double = {
+    log(docCount / numTerms)
+  }
   
   def buildTweet(obj: MongoDBObject): Tweet = {
     val text = obj.getAs[String]("Text").get;
